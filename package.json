@@ -6,11 +6,11 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "server": "./server.sh start",
-    "server:stop": "./server.sh stop",
-    "server:restart": "./server.sh restart",
-    "server:status": "./server.sh status",
-    "server:logs": "./server.sh logs",
+    "server": "node scripts/server.js start",
+    "server:stop": "node scripts/server.js stop",
+    "server:restart": "node scripts/server.js restart",
+    "server:status": "node scripts/server.js status",
+    "server:logs": "node scripts/server.js logs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
