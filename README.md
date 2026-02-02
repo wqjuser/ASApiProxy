@@ -35,6 +35,7 @@ cp .env.example .env
 | LOG_LEVEL | 日志级别 | info |
 | LOG_FILE | 日志文件 | logs/proxy.log |
 | ENABLE_STATS | 启用统计 | true |
+| MODEL_FILTER | 模型过滤（模糊匹配，逗号分隔，支持实时更新） | - |
 
 ## 运行
 
@@ -44,14 +45,24 @@ cp .env.example .env
 npm start
 ```
 
-**后台运行：**
+**后台运行（跨平台）：**
 
 ```bash
-./server.sh start    # 启动
-./server.sh stop     # 停止
-./server.sh restart  # 重启
-./server.sh status   # 状态
-./server.sh logs     # 查看日志
+npm run server         # 启动
+npm run server:stop    # 停止
+npm run server:restart # 重启
+npm run server:status  # 状态
+npm run server:logs    # 查看日志
+```
+
+**平台专用脚本：**
+
+```bash
+# macOS/Linux
+./server.sh start|stop|restart|status|logs
+
+# Windows
+server.bat start|stop|restart|status|logs
 ```
 
 ## API 接口
