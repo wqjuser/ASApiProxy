@@ -1,0 +1,19 @@
+# 依赖
+node_modules/
+
+# 环境配置
+.env
+
+# 日志
+logs/
+
+# 进程文件
+.pid
+
+# 系统文件
+.DS_Store
+*.log
+
+# IDE
+.idea/
+.vscode/
