@@ -6,6 +6,9 @@ const { URL } = require('url')
 const logger = require('./lib/logger')
 const stats = require('./lib/stats')
 
+const fs = require('fs')
+const path = require('path')
+
 const app = express()
 
 app.use(express.json({ limit: '10mb' }))
@@ -13,9 +16,23 @@ app.use(express.json({ limit: '10mb' }))
 const TARGET_API = process.env.TARGET_API
 const API_KEY = process.env.API_KEY
 const PORT = process.env.PORT || 3000
-const MODEL_FILTER = process.env.MODEL_FILTER
-  ? process.env.MODEL_FILTER.split(',').map(m => m.trim()).filter(Boolean)
-  : []
+
+// 动态获取模型过滤配置（实时读取 .env 文件）
+function getModelFilter() {
+  try {
+    const envPath = path.join(__dirname, '.env')
+    const envContent = fs.readFileSync(envPath, 'utf8')
+    const match = envContent.match(/^MODEL_FILTER=(.*)$/m)
+    if (match && match[1]) {
+      return match[1].split(',').map(m => m.trim()).filter(Boolean)
+    }
+  } catch {
+    // 读取失败时使用环境变量
+  }
+  const filter = process.env.MODEL_FILTER
+  if (!filter) return []
+  return filter.split(',').map(m => m.trim()).filter(Boolean)
+}
 
 if (!TARGET_API) {
   logger.error('请在 .env 文件中配置 TARGET_API')
@@ -45,12 +62,13 @@ function transformMessages(body) {
 
 // 过滤模型列表（模糊匹配）
 function filterModels(data) {
-  if (MODEL_FILTER.length === 0 || !data || !Array.isArray(data.data)) {
+  const modelFilter = getModelFilter()
+  if (modelFilter.length === 0 || !data || !Array.isArray(data.data)) {
     return data
   }
 
   const filteredData = data.data.filter(model =>
-    MODEL_FILTER.some(keyword => model.id.toLowerCase().includes(keyword.toLowerCase()))
+    modelFilter.some(keyword => model.id.toLowerCase().includes(keyword.toLowerCase()))
   )
 
   return { ...data, data: filteredData }
@@ -170,10 +188,11 @@ app.use('/v1', (req, res) => {
 
 // 启动服务
 const server = app.listen(PORT, () => {
+  const modelFilter = getModelFilter()
   logger.info(`API 代理服务已启动: http://localhost:${PORT}`)
   logger.info(`目标 API: ${TARGET_API}`)
   logger.info(`统计功能: ${stats.isEnabled ? '已启用' : '已禁用'}`)
-  logger.info(`模型过滤: ${MODEL_FILTER.length > 0 ? MODEL_FILTER.join(', ') : '未启用'}`)
+  logger.info(`模型过滤: ${modelFilter.length > 0 ? modelFilter.join(', ') : '未启用'}（支持实时更新）`)
 })
 
 // 优雅关闭
